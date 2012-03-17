@@ -1,0 +1,15 @@
+    service Alice Plumbing HVAC
+    service Bob Plumbing
+    request BrokenHeater HVAC 1
+    request CloggedSink Plumbing 1-2
+    request NeedAC HVAC 1
+    request ColdWater Plumbing 2
+
+    service Alice Guitarist Pianist Singer
+    service Bob Singer Dancer
+    service Charlie Guitarist Pianist Dancer
+    request Wedding Singer 3
+    request RockBand Guitarist 2-3
+    request ClassyParty Pianist 2-3
+    request BarMitzvah Dancer 3
+    request NationalAnthem Singer 3

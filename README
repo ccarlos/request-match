@@ -1,0 +1,47 @@
+Problem 3: Request Matching
+
+Our goal here at Thumbtack is to connect consumers with quality service providers. You've been tasked with implementing the next generation fulfillment engine, which automatically chooses from among a database of service providers to fulfill a collection of requests.
+
+You'll be given a list of service providers, each tagged with one or more categories. You'll also be given a list of requests, each with the the category of the service needed and the dates the service may be done. Every request can be done in a single day. Your goal is to determine how many requests can be fulfilled. A request can only be fulfilled by a service provider in the correct category, and each provider can only do one job per day.
+
+For simplicity the days have been mapped to integers starting with one. A single day may be given, or a single contiguous range of days may be given. For example, "2-5" means 2, 3, 4 and 5. Such a request could be fulfilled on any one (but only one) of those days.
+
+There can be up to 30 services, 40 categories, 20 days, and 150 requests.
+
+Input format:
+
+    One line for each service, consisting of "service" followed by the name of the service and a list of category names.
+    One line for each request, consisting of "request" followed by the name of the request, the category of the request, and the day or day range when the service is needed.
+    One blank line between problems.
+
+Output format:
+
+    The (integer) number of requests that can be fulfilled on a line by itself, one line for each problem in the input.
+
+Sample input:
+
+    --- snip ---
+    service Alice Plumbing HVAC
+    service Bob Plumbing
+    request BrokenHeater HVAC 1
+    request CloggedSink Plumbing 1-2
+    request NeedAC HVAC 1
+    request ColdWater Plumbing 2
+
+    service Alice Guitarist Pianist Singer
+    service Bob Singer Dancer
+    service Charlie Guitarist Pianist Dancer
+    request Wedding Singer 3
+    request RockBand Guitarist 2-3
+    request ClassyParty Pianist 2-3
+    request BarMitzvah Dancer 3
+    request NationalAnthem Singer 3
+    --- snip ---
+
+Sample output:
+
+    --- snip ---
+    3
+    5
+    --- snip ---
+
