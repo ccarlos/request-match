@@ -1,3 +1,9 @@
+Usage:
+    python request_matching.py inputfile
+
+-------------------------------------------------------------------------
+from: www.thumbtack.com/challenges
+
 Problem 3: Request Matching
 
 Our goal here at Thumbtack is to connect consumers with quality service providers. You've been tasked with implementing the next generation fulfillment engine, which automatically chooses from among a database of service providers to fulfill a collection of requests.
@@ -10,13 +16,15 @@ There can be up to 30 services, 40 categories, 20 days, and 150 requests.
 
 Input format:
 
-    One line for each service, consisting of "service" followed by the name of the service and a list of category names.
-    One line for each request, consisting of "request" followed by the name of the request, the category of the request, and the day or day range when the service is needed.
-    One blank line between problems.
+** One line for each service, consisting of "service" followed by the name of the service and a list of category names.
+
+** One line for each request, consisting of "request" followed by the name of the request, the category of the request, and the day or day range when the service is needed.
+
+** One blank line between problems.
 
 Output format:
 
-    The (integer) number of requests that can be fulfilled on a line by itself, one line for each problem in the input.
+** The (integer) number of requests that can be fulfilled on a line by itself, one line for each problem in the input.
 
 Sample input:
 

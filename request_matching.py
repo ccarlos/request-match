@@ -2,22 +2,23 @@ import sys
 
 
 class RequestMatch:
-    """ """
     N_DAYS = 20  # Days total.
-    N_SERV = 0.0  # Services total.
+    N_SERV = 0.0  # Services total, updated in self.process_data()
 
     def __init__(self):
+        self.solved_requests = []
         self.categories = {}  # catg => [names of service providers]
         self.providers = {}   # prov => [categories servicable]
         self.requests = {}    # req_name => {'catg': 'category',
                               #              'days': [days serviceable],
                               #              'last_d': int(last service day),
-                              #              'num_p': % prov that can service
-                              #              #prov that can service/total prov
+                              #              'num_p': % prov's that can service
+                              #              'solved_by': 'name provider',
+                              #              'solved_day': int,
                               #             }
 
     def valid_day_range(self, num):
-        """Is num a valid number or number range? e.g. 2 or 2-19
+        """Is num a valid number or number range? (e.g. 2 or 2-19)
 
         Also checks if num is in range of [1 - Request.Match.N_DAYS].
         """
@@ -36,13 +37,13 @@ class RequestMatch:
         return False
 
     def valid_service(self, line):
-        """Does line have sufficient arguments to be a service?"""
+        """Does line have sufficient elements to be a service?"""
         if len(line) >= 3:
             return True
         return False
 
     def valid_request(self, line):
-        """Does line have sufficient and valid arguments to be a request?"""
+        """Does line have sufficient and valid elements to be a request?"""
         if len(line) == 4 and self.valid_day_range(line[-1]):
             return True
         return False
@@ -62,19 +63,18 @@ class RequestMatch:
         days_l = ([days[0]] if len(days) == 1
                             else range(days[0], days[1] + 1))
 
-        # processing to calc: num_p
         request_data = {'catg': catg, 'days': days_l, 'last_d': days_l[-1],
-                        'num_p': 0}
+                        'num_p': 0, 'solved_by': '', 'solved_day': None}
         self.requests.setdefault(name, {}).update(request_data)
 
     def can_process(self):
-        """Can self be processed in self.processs_data?"""
+        """Can self be processed in self.processs_data()?"""
         if not (self.providers and self.requests):
             return False
         return True
 
     def rank_providers(self, day_requests):
-        """List of providers ranked by the number of services offered.
+        """List of providers ranked by the number of categories offered.
 
         day_requests: used to extract categories and rank providers.
         """
@@ -108,20 +108,35 @@ class RequestMatch:
             day_requests = [r for r in sorted_req if day in r[1]['days']]
             day_providers = self.rank_providers(day_requests)
 
-            # loop day_requests and see if day_providers can solve. 
+            # loop day_requests and see if day_providers can solve.
             for r in day_requests:
                 for prov in day_providers[:]:
                     if prov in self.categories[r[1]['catg']]:
                         # found a match: remove prov from day and request
                         # request(sorted_req)
-                        print "**********SOLVED************"
-                        print "%s solved %s on day: %d" % (prov, r, day)
+
+                        # update request and add to solved requests
+                        r[1]['solved_by'] = prov
+                        r[1]['solved_day'] = day
+                        self.solved_requests.append(r)
+
+                        # remove prov and request
                         day_providers.remove(prov)
                         sorted_req.remove(r)
                         break
 
 
 def main(argv):
+    """
+    Usage: python request_matching.py inputfile
+
+    main() will read in lines from inputfile. Valid lines will be parsed and
+    update the current object. A new object will be created for each problem
+    identified by a blank line. Each problem  will be processed to determine
+    the number of requests fulfilled. After processing we will add the problem
+    to a list. Afterwards, we will iterate the list and determine the number of
+    requests fulfilled for each problem.
+    """
     if len(argv) != 1:
         print >> sys.stderr, "Insufficient number of arguments."
         print >> sys.stderr, "Usage: request_matching.py filename"
@@ -129,33 +144,30 @@ def main(argv):
 
     file_name = argv[0]
 
-    # Each line is read and seperated by words and appended to read_lines.
+    # Each line is seperated by words and appended to read_lines.
     with open(file_name, 'r') as f:
         read_lines = [line.strip().split() for line in f.readlines()]
         read_lines.append([])  # EOF
 
-    req_match_jobs = []
-    obj = RequestMatch()
+    req_match_jobs = []  # Separate problems/jobs by blank lines.
+    job = RequestMatch()
+
+    # Analyze and parse valid lines.
+    # Create a new RequestMatch object for each problem/job.
     for line in read_lines:
         if not line:
-            print "empty ----------"
-            #if obj.can_process():
-            #    req_match_jobs.append(obj)
-            #    obj = RequestMatch()
+            if job.can_process():
+                job.process_data()
+                req_match_jobs.append(job)
+                job = RequestMatch()
             continue
-        if line[0] == "service" and obj.valid_service(line):
-            obj.parse_service(line)
-        elif line[0] == "request" and obj.valid_request(line):
-            obj.parse_request(line)
-        # invalid lines are ignored
+        if line[0] == "service" and job.valid_service(line):
+            job.parse_service(line)
+        elif line[0] == "request" and job.valid_request(line):
+            job.parse_request(line)
 
-    print obj.categories
-    print
-    print obj.requests
-    print
-    print obj.providers
-    print
-    obj.process_data()
+    for job in req_match_jobs:
+        print len(job.solved_requests)
 
 
 if __name__ == '__main__':
