@@ -6,16 +6,22 @@ class RequestMatch:
     N_SERV = 0.0  # Services total, updated in self.process_data()
 
     def __init__(self):
+        """self data structures.
+
+        self.categories:  category => [names of service providers]
+        self.providers:   provider => [categories serviceable]
+        self.requests:    req_name => {'catg': 'category',
+                                       'days': [days serviceable],
+                                       'last_d': int(last service day),
+                                       'num_p': % prov's that can service
+                                       'solved_by': 'name provider',
+                                       'solved_day': int,
+                                      }
+        """
+        self.categories = {}
+        self.providers = {}
+        self.requests = {}
         self.solved_requests = []
-        self.categories = {}  # catg => [names of service providers]
-        self.providers = {}   # prov => [categories servicable]
-        self.requests = {}    # req_name => {'catg': 'category',
-                              #              'days': [days serviceable],
-                              #              'last_d': int(last service day),
-                              #              'num_p': % prov's that can service
-                              #              'solved_by': 'name provider',
-                              #              'solved_day': int,
-                              #             }
 
     def valid_day_range(self, num):
         """Is num a valid number or number range? (e.g. 2 or 2-19)
@@ -89,11 +95,38 @@ class RequestMatch:
         return [x[0] for x in sorted(d.iteritems(), key=lambda x: (x[1]))]
 
     def process_data(self):
+        """Determine the number of problems that can be solved.
+
+        # Definitions
+        SOLVED - Set of all requests solved
+        PROV - Set of all providers
+        REQ - Set of all requests
+            last_d - Last day request can be solved.
+            num_p  - num PROV that can solve REQ / length of PROV
+
+        SR <- order all requests in REQ by: last_d and num_p
+
+        DAY_R <- subset of REQ, all REQ that can be solved in given day
+        DAY_P <- subset of PROV, all PROV ranked by the number of requests
+                 solvable in DAY_R
+
+        # Algorithm
+        SR
+        for day in N_DAYS:
+            DAY_R
+            DAY_P
+            for req in DAY_R
+                If req be solved by someone in DAY_P
+                    Remove someone from DAY_P
+                    Add req to SOLVED
+                    Rem req from SR
+                    break
+        """
         if (len(self.providers) == 0 or len(self.requests) == 0):
             return
 
         # Update: N_SERV and num_p.
-        # Can't assume services come before requests.
+        # Can't assume services come before requests in inputfile.
         RequestMatch.N_SERV = float(len(self.providers))
         for k, v in self.requests.iteritems():
             self.requests[k]['num_p'] = (len(self.categories[v['catg']]) /
@@ -134,8 +167,8 @@ def main(argv):
     update the current object. A new object will be created for each problem
     identified by a blank line. Each problem  will be processed to determine
     the number of requests fulfilled. After processing we will add the problem
-    to a list. Afterwards, we will iterate the list and determine the number of
-    requests fulfilled for each problem.
+    to a list. Afterwards, we will iterate the list and determine the number
+    of requests fulfilled for each problem.
     """
     if len(argv) != 1:
         print >> sys.stderr, "Insufficient number of arguments."
