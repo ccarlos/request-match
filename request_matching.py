@@ -2,7 +2,7 @@ import sys
 
 
 class RequestMatch:
-    N_DAYS = 20  # Days total.
+    N_DAYS = 20   # Days total
     N_SERV = 0.0  # Services total, updated in self.process_data()
 
     def __init__(self):
@@ -95,14 +95,14 @@ class RequestMatch:
         return [x[0] for x in sorted(d.iteritems(), key=lambda x: (x[1]))]
 
     def process_data(self):
-        """Determine the number of problems that can be solved.
+        """Determine the number of requests that can be solved.
 
         # Definitions
         SOLVED - Set of all requests solved
         PROV - Set of all providers
         REQ - Set of all requests
-            last_d - Last day request can be solved.
-            num_p  - num PROV that can solve REQ / length of PROV
+            last_d - Last day REQ instance can be solved.
+            num_p  - num PROV that can solve REQ instance / length of PROV
 
         SR <- order all requests in REQ by: last_d and num_p
 
@@ -145,9 +145,7 @@ class RequestMatch:
             for r in day_requests:
                 for prov in day_providers[:]:
                     if prov in self.categories[r[1]['catg']]:
-                        # found a match: remove prov from day and request
-                        # request(sorted_req)
-
+                        # found a prov that can solve request r:
                         # update request and add to solved requests
                         r[1]['solved_by'] = prov
                         r[1]['solved_day'] = day
