@@ -2,8 +2,8 @@ import sys
 
 
 class RequestMatch:
-    N_DAYS = 20   # Days total
-    N_SERV = 0.0  # Services total, updated in self.process_data()
+    N_DAYS = 20   # Total days
+    N_SERV = 0.0  # Total services: updated in self.process_data()
 
     def __init__(self):
         """self data structures.
@@ -13,8 +13,8 @@ class RequestMatch:
         self.requests:    req_name => {'catg': 'category',
                                        'days': [days serviceable],
                                        'last_d': int(last service day),
-                                       'num_p': % prov's that can service
-                                       'solved_by': 'name provider',
+                                       'num_p': % prov's that can service req.
+                                       'solved_by': 'name of provider',
                                        'solved_day': int,
                                       }
         """
@@ -26,7 +26,7 @@ class RequestMatch:
     def valid_day_range(self, num):
         """Is num a valid number or number range? (e.g. 2 or 2-19)
 
-        Also checks if num is in range of [1 - Request.Match.N_DAYS].
+        Also checks if num is in range of [1 - RequestMatch.N_DAYS].
         """
         import re
         p = re.compile('\d+-\d+|\d+')
@@ -34,7 +34,7 @@ class RequestMatch:
         if m:
             num_list = num.split("-")
 
-            # Check num_list is in range.
+            # Check elements in num_list are in range.
             if len(num_list) == 2:
                 return (len([n for n in num_list
                      if 1 <= int(n) <= RequestMatch.N_DAYS]) == 2)
@@ -74,7 +74,7 @@ class RequestMatch:
         self.requests.setdefault(name, {}).update(request_data)
 
     def can_process(self):
-        """Can self be processed in self.processs_data()?"""
+        """Can self be processed in self.process_data()?"""
         if not (self.providers and self.requests):
             return False
         return True
@@ -85,14 +85,14 @@ class RequestMatch:
         day_requests: used to extract categories and rank providers.
         """
         from collections import defaultdict
-        d = defaultdict(int)  # d: provider => number of categories
+        d = defaultdict(int)  # d: provider => number of categories offered
 
         for r in day_requests:
             catg = r[1]['catg']
             for name in self.categories[catg]:
                 d[name] += 1
 
-        return [x[0] for x in sorted(d.iteritems(), key=lambda x: (x[1]))]
+        return [p[0] for p in sorted(d.iteritems(), key=lambda p: (p[1]))]
 
     def process_data(self):
         """Determine the number of requests that can be solved.
@@ -116,8 +116,8 @@ class RequestMatch:
             DAY_R
             DAY_P
             for req in DAY_R
-                If req be solved by someone in DAY_P
-                    Remove someone from DAY_P
+                If req can be solved by p in DAY_P
+                    Remove p from DAY_P
                     Add req to SOLVED
                     Rem req from SR
                     break
@@ -133,8 +133,8 @@ class RequestMatch:
                                          RequestMatch.N_SERV)
 
         # Order requests by: last_d, num_p
-        sorted_req = [x for x in self.requests.iteritems()]
-        sorted_req.sort(key=lambda x: (x[1]['last_d'], x[1]['num_p']))
+        sorted_req = [r for r in self.requests.iteritems()]
+        sorted_req.sort(key=lambda r: (r[1]['last_d'], r[1]['num_p']))
 
         # Go though days and for each try to solve requests for the given day.
         for day in range(1, RequestMatch.N_DAYS + 1):
@@ -161,6 +161,8 @@ def main(argv):
     """
     Usage: python request_matching.py inputfile
 
+    See README for problem description.
+
     main() will read in lines from inputfile. Valid lines will be parsed and
     update the current object. A new object will be created for each problem
     identified by a blank line. Each problem  will be processed to determine
@@ -175,16 +177,15 @@ def main(argv):
 
     file_name = argv[0]
 
-    # Each line is seperated by words and appended to read_lines.
+    # Each line is seperated by words.
     with open(file_name, 'r') as f:
         read_lines = [line.strip().split() for line in f.readlines()]
         read_lines.append([])  # EOF
 
-    req_match_jobs = []  # Separate problems/jobs by blank lines.
+    req_match_jobs = []
     job = RequestMatch()
 
     # Analyze and parse valid lines.
-    # Create a new RequestMatch object for each problem/job.
     for line in read_lines:
         if not line:
             if job.can_process():
