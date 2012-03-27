@@ -1,4 +1,6 @@
-import sys
+from collections import defaultdict
+from re import compile
+from sys import argv, exit, stderr
 
 
 class RequestMatch:
@@ -28,8 +30,7 @@ class RequestMatch:
 
         Also checks if num is in range of [1 - RequestMatch.N_DAYS].
         """
-        import re
-        p = re.compile('\d+-\d+|\d+')
+        p = compile('\d+-\d+|\d+')
         m = p.match(num)
         if m:
             num_list = num.split("-")
@@ -84,7 +85,6 @@ class RequestMatch:
 
         day_requests: used to extract categories and rank providers.
         """
-        from collections import defaultdict
         d = defaultdict(int)  # d: provider => number of categories offered
 
         for r in day_requests:
@@ -137,7 +137,7 @@ class RequestMatch:
         sorted_req.sort(key=lambda r: (r[1]['last_d'], r[1]['num_p']))
 
         # Go though days and for each try to solve requests for the given day.
-        for day in range(1, RequestMatch.N_DAYS + 1):
+        for day in xrange(1, RequestMatch.N_DAYS + 1):
             day_requests = [r for r in sorted_req if day in r[1]['days']]
             day_providers = self.rank_providers(day_requests)
 
@@ -171,9 +171,9 @@ def main(argv):
     of requests fulfilled for each problem.
     """
     if len(argv) != 1:
-        print >> sys.stderr, "Insufficient number of arguments."
-        print >> sys.stderr, "Usage: request_matching.py filename"
-        sys.exit(2)
+        print >> stderr, "Insufficient number of arguments."
+        print >> stderr, "Usage: request_matching.py filename"
+        exit(2)
 
     file_name = argv[0]
 
@@ -183,6 +183,8 @@ def main(argv):
         read_lines.append([])  # EOF
 
     req_match_jobs = []
+    # Reduce function references.
+    append_job = req_match_jobs.append
     job = RequestMatch()
 
     # Analyze and parse valid lines.
@@ -190,7 +192,7 @@ def main(argv):
         if not line:
             if job.can_process():
                 job.process_data()
-                req_match_jobs.append(job)
+                append_job(job)
                 job = RequestMatch()
             continue
         if line[0] == "service" and job.valid_service(line):
@@ -203,4 +205,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    exit(main(argv[1:]))
